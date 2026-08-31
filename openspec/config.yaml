@@ -1,0 +1,63 @@
+schema: spec-driven
+
+context: |
+  Project: fresas-con-crema (MAISON FRAISE)
+  Business: Private sales/order/inventory/delivery for strawberry desserts — Sabanalarga, Colombia
+  Stack: Next.js 14+ TypeScript (PWA) + NestJS TypeScript + PostgreSQL + Prisma
+  Architecture: Monorepo (pnpm workspaces) — apps/web (Next.js), apps/api (NestJS), packages/shared
+  Constraints: Low-cost, zero paid services — self-hostable, free-tier only (Vercel/Render/Railway/Neon/Supabase-free)
+  Repo: https://github.com/Joserafa20/Fresas-con-Crema.git (empty, branch master)
+  PWA: Offline-capable, installable; Spanish locale (es-CO), COP currency
+
+rules:
+  proposal:
+    - Include cost impact (must stay free-tier)
+    - Include PWA/offline consideration when affecting user-facing flows
+    - Include rollback plan for risky changes
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Write requirements in domain language (orders, inventory, deliveries, customers)
+  design:
+    - Include sequence diagrams for order/delivery flows
+    - Document architecture decisions with rationale and cost tradeoff
+    - Prefer hexagonal/clean boundaries between domain and infra
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session (< 400 lines per PR)
+    - Tag PWA/backend/shared tasks explicitly
+  apply:
+    guidelines:
+      - Follow existing code patterns (Atomic Design on web, modules on api)
+      - Keep docs with code (co-located tests/specs)
+    tdd: false
+    test_command: "pnpm test"
+  verify:
+    test_command: "pnpm test"
+    build_command: "pnpm build"
+    coverage_threshold: 70
+  archive:
+    - Warn before merging destructive deltas
+
+# Detected capabilities (2026-08-31) — no code yet, proposed runners
+testing:
+  strict_tdd: false
+  reason: "No test runner detected yet (empty repo). Strict TDD disabled until Vitest/Jest installed."
+  runner:
+    command: "pnpm test"
+    framework: "Vitest (proposed: vitest for web + api, happy-dom/jsdom, @testing-library/react)"
+  layers:
+    unit: { available: false, tool: "vitest (proposed)" }
+    integration: { available: false, tool: "@testing-library/react + supertest (proposed)" }
+    e2e: { available: false, tool: "Playwright (proposed, optional)" }
+  coverage:
+    available: false
+    command: "pnpm coverage (vitest --coverage via @vitest/coverage-v8)"
+  quality:
+    linter: { available: false, command: "eslint (proposed)" }
+    type_checker: { available: false, command: "tsc --noEmit (proposed)" }
+    formatter: { available: false, command: "prettier (proposed)" }
+
+artifact_store: hybrid
+project: fresas-con-crema
+initialized: 2026-08-31
