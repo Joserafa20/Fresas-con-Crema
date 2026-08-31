@@ -1,0 +1,40 @@
+# Local AI runtime state
+.atl/
+
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.turbo/
+coverage/
+
+# Env
+.env
+.env.local
+.env.development.local
+.env.production.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+pnpm-debug.log*
+*.log
+
+# Prisma
+prisma/migrations/
+
+# Misc
+.cache/
