@@ -95,3 +95,117 @@ model ProductImage {
 
   @@index([productId, sortOrder])
 }
+
+// ── Order Domain ──────────────────────────────────────────
+
+enum OrderStatus {
+  NUEVO
+  CONFIRMADO
+  EN_PREPARACION
+  LISTO
+  EN_CAMINO
+  ENTREGADO
+  CANCELADO
+}
+
+enum PaymentStatus {
+  PENDIENTE
+  VERIFICANDO
+  CONFIRMADO
+  RECHAZADO
+  NO_APLICA
+}
+
+enum PaymentMethod {
+  EFECTIVO
+  NEQUI
+  DAVIPLATA
+  LLAVE_BRE_B
+}
+
+enum OrderOrigin {
+  ONLINE
+  DIRECT
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String   @unique
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Order {
+  id             String              @id @default(cuid())
+  code           String              @unique
+  status         OrderStatus         @default(NUEVO)
+  origin         OrderOrigin         @default(ONLINE)
+  deliveryMethod String
+  customerName   String
+  customerPhone  String
+  address        String?
+  barrio         String?
+  reference      String?
+  notes          String?
+  totalCents     Int
+  customerId     String
+  customer       Customer            @relation(fields: [customerId], references: [id])
+  items          OrderItem[]
+  payment        Payment?
+  statusHistory  OrderStatusHistory[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id            String             @id @default(cuid())
+  orderId       String
+  productId     String
+  variantId     String
+  productName   String
+  variantName   String
+  priceAtOrder  Int
+  quantity      Int
+  order         Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  toppings      OrderItemTopping[]
+
+  @@index([orderId])
+}
+
+model OrderItemTopping {
+  id            String    @id @default(cuid())
+  orderItemId   String
+  toppingId     String
+  toppingName   String
+  priceAtOrder  Int
+  orderItem     OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+
+  @@index([orderItemId])
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  orderId   String        @unique
+  method    PaymentMethod
+  status    PaymentStatus @default(PENDIENTE)
+  note      String?
+  order     Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model OrderStatusHistory {
+  id         String      @id @default(cuid())
+  orderId    String
+  fromStatus OrderStatus
+  toStatus   OrderStatus
+  note       String?
+  createdAt  DateTime    @default(now())
+  order      Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+}

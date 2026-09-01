@@ -4,6 +4,8 @@ export const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   PORT: z.coerce.number().int().min(1).max(65535).default(3001),
   CORS_ORIGIN: z.string().default("http://localhost:3000"),
+  BUSINESS_HOURS_START: z.string().optional(),
+  BUSINESS_HOURS_END: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
