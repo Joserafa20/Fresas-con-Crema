@@ -1,4 +1,10 @@
 "use client";
+const TOPPING_UNIT_PRICE = 1500;
+
+function formatCop(cents: number): string {
+  return `$${cents.toLocaleString("es-CO")}`;
+}
+
 export function ToppingSelector({
   toppings,
   selected,
@@ -18,7 +24,7 @@ export function ToppingSelector({
           <label key={id} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
             <input type="checkbox" checked={checked} onChange={() => onToggle(id)} />
             <span>{name}</span>
-            <small style={{ opacity: 0.6 }}>+15.00 COP</small>
+            <small style={{ opacity: 0.6 }}>+{formatCop(TOPPING_UNIT_PRICE)}</small>
           </label>
         );
       })}

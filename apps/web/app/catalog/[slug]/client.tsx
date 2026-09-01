@@ -43,6 +43,23 @@ export function CatalogDetailClient({ product }: { product: any }) {
           base {formatCop(base)} + {selected.length} × {formatCop(TOPPING_UNIT_PRICE)}
         </span>
       </div>
+      <a
+        href={`/checkout?variant=${variantId}&toppings=${selected.join(",")}`}
+        style={{
+          display: "block",
+          marginTop: 16,
+          padding: "14px 0",
+          background: "#e11d48",
+          color: "#fff",
+          textAlign: "center",
+          borderRadius: 8,
+          fontWeight: 700,
+          fontSize: 16,
+          textDecoration: "none",
+        }}
+      >
+        Hacer Pedido — {formatCop(total)}
+      </a>
     </main>
   );
 }

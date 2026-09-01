@@ -1,4 +1,8 @@
 "use client";
+function formatCop(cents: number): string {
+  return `$${cents.toLocaleString("es-CO")}`;
+}
+
 export function VariantPicker({ variants, value, onChange }: { variants: any[]; value: string; onChange: (id: string) => void }) {
   return (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -14,7 +18,7 @@ export function VariantPicker({ variants, value, onChange }: { variants: any[]; 
             cursor: "pointer",
           }}
         >
-          {v.name} — {(v.priceCents / 100).toFixed(2)} COP
+          {v.name} — {formatCop(v.priceCents)}
         </button>
       ))}
     </div>
