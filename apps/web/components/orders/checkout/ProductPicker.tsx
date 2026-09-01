@@ -29,11 +29,9 @@ export interface CartItem {
 
 interface ProductPickerProps {
   onAddItem: (item: CartItem) => void;
-  initialVariantId?: string | null;
-  initialToppings?: string | null;
 }
 
-export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: ProductPickerProps) {
+export function ProductPicker({ onAddItem }: ProductPickerProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
@@ -49,22 +47,6 @@ export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: 
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
   }, []);
-
-  // Preselect from URL params AFTER products load
-  useEffect(() => {
-    if (loading || products.length === 0 || !initialVariantId) return;
-    for (const p of products) {
-      const v = p.variants?.find((v: any) => v.id === initialVariantId);
-      if (v) {
-        setSelectedProductId(p.id);
-        setSelectedVariantId(v.id);
-        if (initialToppings) {
-          setSelectedToppings(initialToppings.split(",").filter(Boolean));
-        }
-        break;
-      }
-    }
-  }, [loading, products, initialVariantId, initialToppings]);
 
   const selectedProduct = products.find((p) => p.id === selectedProductId) ?? null;
   const selectedVariant = selectedProduct?.variants.find((v) => v.id === selectedVariantId) ?? selectedProduct?.variants[0] ?? null;
@@ -94,8 +76,10 @@ export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: 
       }),
     };
     onAddItem(item);
-    setQuantity(1);
+    setSelectedProductId(null);
+    setSelectedVariantId(null);
     setSelectedToppings([]);
+    setQuantity(1);
   };
 
   if (loading) {
@@ -103,27 +87,27 @@ export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: 
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <h3 style={{ margin: 0 }}>Selecciona tu producto</h3>
+    <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: 16, background: "#f9fafb", borderRadius: 12, border: "1px dashed #ddd" }}>
+      <h3 style={{ margin: 0, fontSize: 14 }}>➕ Agregar otro producto</h3>
 
       {/* Product grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 6 }}>
         {products.map((p) => (
           <button
             key={p.id}
             onClick={() => { setSelectedProductId(p.id); setSelectedVariantId(p.variants[0]?.id ?? null); setSelectedToppings([]); setQuantity(1); }}
             style={{
-              padding: "10px 8px",
+              padding: "8px 6px",
               borderRadius: 8,
               border: selectedProductId === p.id ? "2px solid #e11d48" : "1px solid #ddd",
               background: selectedProductId === p.id ? "#ffe4e6" : "#fff",
               cursor: "pointer",
-              fontSize: 13,
-              textAlign: "left",
+              fontSize: 12,
+              textAlign: "center",
             }}
           >
-            <strong>{p.name}</strong>
-            {p.variants[0] && <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>{formatCop(p.variants[0].priceCents)}</div>}
+            <strong style={{ fontSize: 11 }}>{p.name}</strong>
+            {p.variants[0] && <div style={{ fontSize: 10, opacity: 0.7, marginTop: 2 }}>{formatCop(p.variants[0].priceCents)}</div>}
           </button>
         ))}
       </div>
@@ -132,18 +116,19 @@ export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: 
         <>
           {/* Variant selection */}
           <div>
-            <label style={{ fontSize: 13, fontWeight: 600 }}>Tamaño</label>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
+            <label style={{ fontSize: 12, fontWeight: 600 }}>Tamaño</label>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
               {selectedProduct.variants.map((v) => (
                 <button
                   key={v.id}
                   onClick={() => setSelectedVariantId(v.id)}
                   style={{
-                    padding: "8px 14px",
-                    borderRadius: 20,
+                    padding: "6px 12px",
+                    borderRadius: 16,
                     border: selectedVariantId === v.id ? "2px solid #e11d48" : "1px solid #ddd",
                     background: selectedVariantId === v.id ? "#ffe4e6" : "#fff",
                     cursor: "pointer",
+                    fontSize: 12,
                   }}
                 >
                   {v.name} — {formatCop(v.priceCents)}
@@ -155,14 +140,14 @@ export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: 
           {/* Toppings */}
           {selectedProduct.toppings.length > 0 && (
             <div>
-              <label style={{ fontSize: 13, fontWeight: 600 }}>Toppings (+{formatCop(TOPPING_UNIT_PRICE)} c/u)</label>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4 }}>
+              <label style={{ fontSize: 12, fontWeight: 600 }}>Toppings (+{formatCop(TOPPING_UNIT_PRICE)} c/u)</label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
                 {selectedProduct.toppings.map((t) => {
                   const tid = getToppingId(t);
                   const tname = getToppingName(t);
                   const checked = selectedToppings.includes(tid);
                   return (
-                    <label key={tid} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 14 }}>
+                    <label key={tid} style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer", fontSize: 12 }}>
                       <input
                         type="checkbox"
                         checked={checked}
@@ -176,45 +161,40 @@ export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: 
             </div>
           )}
 
-          {/* Quantity */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <label style={{ fontSize: 13, fontWeight: 600 }}>Cantidad</label>
+          {/* Quantity + Add */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 600 }}>Cant.</span>
+              <button
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                style={{ width: 30, height: 30, borderRadius: 15, border: "1px solid #ddd", background: "#fff", cursor: "pointer", fontSize: 16 }}
+              >
+                −
+              </button>
+              <span style={{ fontWeight: 700, minWidth: 24, textAlign: "center" }}>{quantity}</span>
+              <button
+                onClick={() => setQuantity((q) => q + 1)}
+                style={{ width: 30, height: 30, borderRadius: 15, border: "1px solid #ddd", background: "#fff", cursor: "pointer", fontSize: 16 }}
+              >
+                +
+              </button>
+            </div>
             <button
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              style={{ width: 36, height: 36, borderRadius: 18, border: "1px solid #ddd", background: "#fff", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}
+              onClick={handleAdd}
+              style={{
+                padding: "8px 16px",
+                borderRadius: 8,
+                border: "none",
+                background: "#e11d48",
+                color: "#fff",
+                fontWeight: 600,
+                fontSize: 13,
+                cursor: "pointer",
+              }}
             >
-              −
-            </button>
-            <span style={{ fontWeight: 700, minWidth: 30, textAlign: "center", fontSize: 18 }}>{quantity}</span>
-            <button
-              onClick={() => setQuantity((q) => q + 1)}
-              style={{ width: 36, height: 36, borderRadius: 18, border: "1px solid #ddd", background: "#fff", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}
-            >
-              +
+              Agregar — {formatCop(itemTotal)}
             </button>
           </div>
-
-          {/* Item total */}
-          <div style={{ padding: 10, background: "#fff1f2", borderRadius: 8, fontSize: 14 }}>
-            Subtotal: <strong>{formatCop(itemTotal)}</strong>
-          </div>
-
-          {/* Add button */}
-          <button
-            onClick={handleAdd}
-            style={{
-              padding: "12px 20px",
-              borderRadius: 8,
-              border: "none",
-              background: "#e11d48",
-              color: "#fff",
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: "pointer",
-            }}
-          >
-            Agregar al pedido
-          </button>
         </>
       )}
     </div>

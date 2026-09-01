@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useState, useCallback, useEffect } from "react";
+import { Suspense, useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ProductPicker, CartItem } from "../../components/orders/checkout/ProductPicker";
 import { CustomerForm, CustomerData } from "../../components/orders/checkout/CustomerForm";
@@ -19,6 +19,12 @@ const EMPTY_CUSTOMER: CustomerData = {
   deliveryMethod: "pickup",
 };
 
+const TOPPING_UNIT_PRICE = 1500;
+
+function formatCop(cents: number): string {
+  return `$${cents.toLocaleString("es-CO")}`;
+}
+
 function CheckoutInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -29,11 +35,52 @@ function CheckoutInner() {
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [orderCode, setOrderCode] = useState<string | null>(null);
-  const [preselected, setPreselected] = useState(false);
+  const autoAddedRef = useRef(false);
 
-  // Read variant+toppings from URL params (from "Hacer Pedido" link)
-  const initialVariant = searchParams.get("variant");
-  const initialToppings = searchParams.get("toppings");
+  // Read URL params
+  const productId = searchParams.get("productId");
+  const variantId = searchParams.get("variant");
+  const toppingsParam = searchParams.get("toppings");
+  const qtyParam = searchParams.get("qty");
+
+  // Auto-add item from catalog link
+  useEffect(() => {
+    if (autoAddedRef.current) return;
+    if (!productId || !variantId) return;
+
+    autoAddedRef.current = true;
+    const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+
+    fetch(`${base}/api/v1/products`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((products: any[]) => {
+        const product = products.find((p) => p.id === productId);
+        if (!product) return;
+
+        const variant = product.variants?.find((v: any) => v.id === variantId);
+        if (!variant) return;
+
+        const toppingIds = toppingsParam ? toppingsParam.split(",").filter(Boolean) : [];
+        const quantity = qtyParam ? Math.max(1, parseInt(qtyParam, 10)) : 1;
+
+        const item: CartItem = {
+          productId: product.id,
+          productName: product.name,
+          variantId: variant.id,
+          variantName: variant.name,
+          priceAtOrder: variant.priceCents + toppingIds.length * TOPPING_UNIT_PRICE,
+          quantity,
+          toppings: toppingIds.map((tid) => {
+            const t = product.toppings?.find((tp: any) => (tp.id ?? tp.topping?.id) === tid);
+            const tname = t?.name ?? t?.topping?.name ?? "";
+            return { toppingId: tid, toppingName: tname, priceAtOrder: TOPPING_UNIT_PRICE };
+          }),
+        };
+
+        setItems([item]);
+      })
+      .catch(() => {});
+  }, [productId, variantId, toppingsParam, qtyParam]);
 
   const addItem = useCallback((item: CartItem) => {
     setItems((prev) => [...prev, item]);
@@ -165,25 +212,43 @@ function CheckoutInner() {
       {/* Step content */}
       {step === "cart" && (
         <>
-          <ProductPicker onAddItem={addItem} initialVariantId={initialVariant} initialToppings={initialToppings} />
+          {/* Cart items */}
+          {items.length > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              <h3 style={{ margin: "0 0 8px" }}>Tu pedido ({items.length} {items.length === 1 ? "producto" : "productos"})</h3>
+              {items.map((item, i) => {
+                const lineTotal = item.priceAtOrder * item.quantity;
+                return (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #eee", fontSize: 13 }}>
+                    <div>
+                      <strong>{item.productName}</strong> · {item.variantName} × {item.quantity}
+                      {item.toppings.length > 0 && (
+                        <div style={{ fontSize: 11, opacity: 0.6 }}>+{item.toppings.map((t) => t.toppingName).join(", ")}</div>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontWeight: 600 }}>{formatCop(lineTotal)}</span>
+                      <button onClick={() => removeItem(i)} style={{ fontSize: 11, color: "#e11d48", background: "none", border: "none", cursor: "pointer" }}>
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              <div style={{ marginTop: 8, padding: 10, background: "#fff1f2", borderRadius: 8, fontWeight: 700, fontSize: 14 }}>
+                Total: {formatCop(items.reduce((sum, item) => sum + item.priceAtOrder * item.quantity, 0))}
+              </div>
+            </div>
+          )}
+
           {errors.cart && (
-            <div style={{ marginTop: 8, padding: 8, background: "#fef2f2", borderRadius: 8, color: "#e11d48", fontSize: 13 }}>
+            <div style={{ marginBottom: 8, padding: 8, background: "#fef2f2", borderRadius: 8, color: "#e11d48", fontSize: 13 }}>
               {errors.cart}
             </div>
           )}
-          {items.length > 0 && (
-            <div style={{ marginTop: 16 }}>
-              <h3 style={{ margin: "0 0 8px" }}>Tu pedido ({items.length} items)</h3>
-              {items.map((item, i) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #eee", fontSize: 13 }}>
-                  <span>{item.productName} · {item.variantName} × {item.quantity}</span>
-                  <button onClick={() => removeItem(i)} style={{ fontSize: 11, color: "#e11d48", background: "none", border: "none", cursor: "pointer" }}>
-                    Quitar
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+
+          {/* Add more products */}
+          <ProductPicker onAddItem={addItem} />
         </>
       )}
 
