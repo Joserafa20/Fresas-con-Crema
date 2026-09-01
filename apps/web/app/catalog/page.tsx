@@ -17,7 +17,10 @@ export default async function CatalogPage() {
   const products = await getProducts();
   return (
     <main style={{ padding: "1rem", maxWidth: 1200, margin: "0 auto" }}>
-      <h1>Catalogo</h1>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+        <a href="/" style={{ fontSize: 13, color: "#e11d48", textDecoration: "none", fontWeight: 600 }}>← Inicio</a>
+        <h1 style={{ margin: 0 }}>Catálogo</h1>
+      </div>
       <div
         style={{
           display: "grid",

@@ -28,6 +28,7 @@ export function CatalogDetailClient({ product }: { product: any }) {
 
   return (
     <main style={{ padding: "1rem", maxWidth: 640, margin: "0 auto" }}>
+      <a href="/catalog" style={{ fontSize: 13, color: "#e11d48", textDecoration: "none", fontWeight: 600, display: "inline-block", marginBottom: 8 }}>← Catálogo</a>
       <h1>{product.name}</h1>
       {product.images?.[0] && (
         <div style={{ position: "relative", width: "100%", aspectRatio: "1/1", background: "#fafafa", borderRadius: 12, overflow: "hidden" }}>
