@@ -1,7 +1,19 @@
 "use client";
 import Link from "next/link";
-import { formatCop } from "@maison-fraise/shared";
-import type { OrderListItem } from "@maison-fraise/shared";
+
+function formatCop(cents: number): string {
+  return `$${cents.toLocaleString("es-CO")}`;
+}
+
+type OrderListItem = {
+  code: string;
+  status: string;
+  customerName: string;
+  customerPhone: string;
+  totalCents: number;
+  createdAt: string | Date;
+  payment?: { status: string } | null;
+};
 
 const STATUS_COLORS: Record<string, string> = {
   NUEVO: "#f59e0b",

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import type { PaymentStatus } from "@maison-fraise/shared";
+
+type PaymentStatus = "PENDIENTE" | "VERIFICANDO" | "CONFIRMADO" | "RECHAZADO" | "NO_APLICA";
 
 interface PaymentActionsProps {
   orderId: string;

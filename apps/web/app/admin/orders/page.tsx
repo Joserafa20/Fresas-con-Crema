@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { OrderRow } from "../../../components/orders/admin/OrderRow";
 import { SoundAlert } from "../../../components/orders/admin/SoundAlert";
-import type { OrderListItem } from "@maison-fraise/shared";
 
 type StatusFilter = "" | "NUEVO" | "CONFIRMADO" | "EN_PREPARACION" | "LISTO" | "EN_CAMINO" | "ENTREGADO" | "CANCELADO";
 

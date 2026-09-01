@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import type { OrderStatus } from "@maison-fraise/shared";
+
+type OrderStatus = "NUEVO" | "CONFIRMADO" | "EN_PREPARACION" | "LISTO" | "EN_CAMINO" | "ENTREGADO" | "CANCELADO";
 
 const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   NUEVO: ["CONFIRMADO", "CANCELADO"],

@@ -1,10 +1,47 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { formatCop } from "@maison-fraise/shared";
 import { StatusActions } from "../../../../components/orders/admin/StatusActions";
 import { PaymentActions } from "../../../../components/orders/admin/PaymentActions";
-import type { OrderResponse } from "@maison-fraise/shared";
+
+function formatCop(cents: number): string {
+  return `$${cents.toLocaleString("es-CO")}`;
+}
+
+type OrderStatus = "NUEVO" | "CONFIRMADO" | "EN_PREPARACION" | "LISTO" | "EN_CAMINO" | "ENTREGADO" | "CANCELADO";
+type PaymentStatus = "PENDIENTE" | "VERIFICANDO" | "CONFIRMADO" | "RECHAZADO" | "NO_APLICA";
+
+type OrderResponse = {
+  id: string;
+  code: string;
+  status: OrderStatus;
+  origin: string;
+  deliveryMethod: string;
+  customerName: string;
+  customerPhone: string;
+  address?: string | null;
+  barrio?: string | null;
+  reference?: string | null;
+  notes?: string | null;
+  totalCents: number;
+  items: {
+    id: string;
+    productName: string;
+    variantName: string;
+    priceAtOrder: number;
+    quantity: number;
+    toppings: { toppingName: string; priceAtOrder: number }[];
+  }[];
+  payment?: { method: string; status: PaymentStatus } | null;
+  statusHistory: {
+    id: string;
+    fromStatus: string;
+    toStatus: string;
+    note?: string | null;
+    createdAt: string | Date;
+  }[];
+  createdAt: string | Date;
+};
 
 const STATUS_COLORS: Record<string, string> = {
   NUEVO: "#f59e0b",
