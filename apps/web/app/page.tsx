@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export const revalidate = 60;
 
@@ -127,6 +128,7 @@ export default async function Home() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
             {products.slice(0, 4).map((p: any) => {
               const price = p.variants?.[0]?.priceCents ?? 0;
+              const hasImage = p.images && p.images.length > 0 && p.images[0].url;
               return (
                 <Link key={p.id} href={`/catalog/${p.slug}`} style={{
                   textDecoration: "none", color: "inherit",
@@ -136,11 +138,15 @@ export default async function Home() {
                   transition: "box-shadow 0.2s, transform 0.2s",
                 }}>
                   <div style={{
-                    height: 140, background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
+                    height: 160, background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 48,
+                    position: "relative", overflow: "hidden",
                   }}>
-                    🍓
+                    {hasImage ? (
+                      <Image src={p.images[0].url} alt={p.name} fill style={{ objectFit: "cover" }} sizes="(max-width: 600px) 100vw, 200px" />
+                    ) : (
+                      <span style={{ fontSize: 48 }}>🍓</span>
+                    )}
                   </div>
                   <div style={{ padding: "12px 14px" }}>
                     <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{p.name}</div>
