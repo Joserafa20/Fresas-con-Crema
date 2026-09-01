@@ -21,4 +21,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - name: Check no hardcoded catalog prices
+        run: |
+          ! grep -R --include="*.ts" --include="*.tsx" -E "10000|12000|15000" apps/ packages/ --exclude-dir=node_modules | grep -v "seed" | grep -v "TOPPING" | grep -v "priceCents" | grep -q .
       - run: pnpm build
