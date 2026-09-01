@@ -18,7 +18,13 @@ export default async function CatalogPage() {
   return (
     <main style={{ padding: "1rem", maxWidth: 1200, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-        <a href="/" style={{ fontSize: 13, color: "#e11d48", textDecoration: "none", fontWeight: 600 }}>← Inicio</a>
+        <a href="/" style={{
+          display: "inline-flex", alignItems: "center", gap: 4,
+          padding: "8px 16px", borderRadius: 8,
+          background: "#fff1f2", color: "#e11d48",
+          textDecoration: "none", fontWeight: 700, fontSize: 14,
+          border: "1px solid #fecdd3",
+        }}>← Inicio</a>
         <h1 style={{ margin: 0 }}>Catálogo</h1>
       </div>
       <div

@@ -28,7 +28,13 @@ export function CatalogDetailClient({ product }: { product: any }) {
 
   return (
     <main style={{ padding: "1rem", maxWidth: 640, margin: "0 auto" }}>
-      <a href="/catalog" style={{ fontSize: 13, color: "#e11d48", textDecoration: "none", fontWeight: 600, display: "inline-block", marginBottom: 8 }}>← Catálogo</a>
+      <a href="/catalog" style={{
+        display: "inline-flex", alignItems: "center", gap: 4,
+        padding: "8px 16px", borderRadius: 8,
+        background: "#fff1f2", color: "#e11d48",
+        textDecoration: "none", fontWeight: 700, fontSize: 14,
+        border: "1px solid #fecdd3", marginBottom: 8,
+      }}>← Catálogo</a>
       <h1>{product.name}</h1>
       {product.images?.[0] && (
         <div style={{ position: "relative", width: "100%", aspectRatio: "1/1", background: "#fafafa", borderRadius: 12, overflow: "hidden" }}>
