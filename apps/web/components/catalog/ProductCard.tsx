@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { formatCop } from "@maison-fraise/shared";
+
+function formatCop(cents: number): string {
+  return `$${cents.toLocaleString("es-CO")}`;
+}
 
 export function ProductCard({ product }: { product: any }) {
   const cover = product.images?.[0]?.url ?? "/placeholder.jpg";

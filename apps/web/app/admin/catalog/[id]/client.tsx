@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
-import { formatCop } from "@maison-fraise/shared";
+
+function formatCop(cents: number): string {
+  return `$${cents.toLocaleString("es-CO")}`;
+}
 
 export function AdminEditClient({ product }: { product: any }) {
   const [msg, setMsg] = useState("");

@@ -1,9 +1,18 @@
 "use client";
 import { useState, useMemo } from "react";
 import Image from "next/image";
-import { calcTotalCents, formatCop, TOPPING_UNIT_PRICE } from "@maison-fraise/shared";
 import { VariantPicker } from "../../../components/catalog/VariantPicker";
 import { ToppingSelector } from "../../../components/catalog/ToppingSelector";
+
+const TOPPING_UNIT_PRICE = 1500;
+
+function calcTotalCents(baseCents: number, toppingCount: number): number {
+  return baseCents + TOPPING_UNIT_PRICE * toppingCount;
+}
+
+function formatCop(cents: number): string {
+  return `$${cents.toLocaleString("es-CO")}`;
+}
 
 export function CatalogDetailClient({ product }: { product: any }) {
   const variants = product.variants ?? [];
