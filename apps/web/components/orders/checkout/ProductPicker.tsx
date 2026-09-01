@@ -14,7 +14,7 @@ interface Product {
   description?: string;
   images?: { url: string }[];
   variants: { id: string; name: string; priceCents: number }[];
-  toppings: { id: string; name: string }[];
+  toppings: { id: string; name: string; topping?: { id: string; name: string } }[];
 }
 
 export interface CartItem {
@@ -45,29 +45,32 @@ export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: 
     const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
     fetch(`${base}/api/v1/products`)
       .then((r) => (r.ok ? r.json() : []))
-      .then((data) => {
-        setProducts(data);
-        // Preselect from URL params
-        if (initialVariantId) {
-          for (const p of data) {
-            const v = p.variants?.find((v: any) => v.id === initialVariantId);
-            if (v) {
-              setSelectedProductId(p.id);
-              setSelectedVariantId(v.id);
-              if (initialToppings) {
-                setSelectedToppings(initialToppings.split(",").filter(Boolean));
-              }
-              break;
-            }
-          }
-        }
-      })
+      .then((data) => setProducts(data))
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
-  }, [initialVariantId, initialToppings]);
+  }, []);
+
+  // Preselect from URL params AFTER products load
+  useEffect(() => {
+    if (loading || products.length === 0 || !initialVariantId) return;
+    for (const p of products) {
+      const v = p.variants?.find((v: any) => v.id === initialVariantId);
+      if (v) {
+        setSelectedProductId(p.id);
+        setSelectedVariantId(v.id);
+        if (initialToppings) {
+          setSelectedToppings(initialToppings.split(",").filter(Boolean));
+        }
+        break;
+      }
+    }
+  }, [loading, products, initialVariantId, initialToppings]);
 
   const selectedProduct = products.find((p) => p.id === selectedProductId) ?? null;
   const selectedVariant = selectedProduct?.variants.find((v) => v.id === selectedVariantId) ?? selectedProduct?.variants[0] ?? null;
+
+  const getToppingName = (t: any) => t.name ?? t.topping?.name ?? "";
+  const getToppingId = (t: any) => t.id ?? t.topping?.id ?? "";
 
   const itemTotal = useMemo(() => {
     if (!selectedVariant) return 0;
@@ -86,8 +89,8 @@ export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: 
       priceAtOrder: selectedVariant.priceCents + selectedToppings.length * TOPPING_UNIT_PRICE,
       quantity,
       toppings: selectedToppings.map((tid) => {
-        const t = selectedProduct.toppings.find((tp) => tp.id === tid);
-        return { toppingId: tid, toppingName: t?.name ?? "", priceAtOrder: TOPPING_UNIT_PRICE };
+        const t = selectedProduct.toppings.find((tp) => getToppingId(tp) === tid);
+        return { toppingId: tid, toppingName: getToppingName(t ?? {}), priceAtOrder: TOPPING_UNIT_PRICE };
       }),
     };
     onAddItem(item);
@@ -108,7 +111,7 @@ export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: 
         {products.map((p) => (
           <button
             key={p.id}
-            onClick={() => { setSelectedProductId(p.id); setSelectedVariantId(p.variants[0]?.id ?? null); setSelectedToppings([]); }}
+            onClick={() => { setSelectedProductId(p.id); setSelectedVariantId(p.variants[0]?.id ?? null); setSelectedToppings([]); setQuantity(1); }}
             style={{
               padding: "10px 8px",
               borderRadius: 8,
@@ -155,15 +158,17 @@ export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: 
               <label style={{ fontSize: 13, fontWeight: 600 }}>Toppings (+{formatCop(TOPPING_UNIT_PRICE)} c/u)</label>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4 }}>
                 {selectedProduct.toppings.map((t) => {
-                  const checked = selectedToppings.includes(t.id);
+                  const tid = getToppingId(t);
+                  const tname = getToppingName(t);
+                  const checked = selectedToppings.includes(tid);
                   return (
-                    <label key={t.id} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 14 }}>
+                    <label key={tid} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 14 }}>
                       <input
                         type="checkbox"
                         checked={checked}
-                        onChange={() => setSelectedToppings((s) => (s.includes(t.id) ? s.filter((x) => x !== t.id) : [...s, t.id]))}
+                        onChange={() => setSelectedToppings((s) => (s.includes(tid) ? s.filter((x) => x !== tid) : [...s, tid]))}
                       />
-                      {t.name}
+                      {tname}
                     </label>
                   );
                 })}
@@ -176,14 +181,14 @@ export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: 
             <label style={{ fontSize: 13, fontWeight: 600 }}>Cantidad</label>
             <button
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              style={{ width: 32, height: 32, borderRadius: 16, border: "1px solid #ddd", background: "#fff", cursor: "pointer", fontSize: 16 }}
+              style={{ width: 36, height: 36, borderRadius: 18, border: "1px solid #ddd", background: "#fff", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}
             >
               −
             </button>
-            <span style={{ fontWeight: 600, minWidth: 24, textAlign: "center" }}>{quantity}</span>
+            <span style={{ fontWeight: 700, minWidth: 30, textAlign: "center", fontSize: 18 }}>{quantity}</span>
             <button
               onClick={() => setQuantity((q) => q + 1)}
-              style={{ width: 32, height: 32, borderRadius: 16, border: "1px solid #ddd", background: "#fff", cursor: "pointer", fontSize: 16 }}
+              style={{ width: 36, height: 36, borderRadius: 18, border: "1px solid #ddd", background: "#fff", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}
             >
               +
             </button>
