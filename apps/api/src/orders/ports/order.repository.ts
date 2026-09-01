@@ -15,5 +15,6 @@ export interface OrderRepository {
     note?: string,
   ): Promise<any>;
   countTodayOrders(date: Date): Promise<number>;
+  getStats(): Promise<any>;
 }
 export const ORDER_REPOSITORY = Symbol("ORDER_REPOSITORY");

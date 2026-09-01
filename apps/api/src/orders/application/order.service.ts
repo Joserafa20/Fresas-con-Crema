@@ -119,4 +119,8 @@ export class OrderService {
 
     return this.orderRepo.updatePayment(orderId, status, note);
   }
+
+  async getStats() {
+    return this.orderRepo.getStats();
+  }
 }

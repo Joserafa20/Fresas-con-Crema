@@ -40,6 +40,11 @@ export class OrderController {
     return this.service.listOrders({ status: "NUEVO" });
   }
 
+  @Get("stats")
+  stats() {
+    return this.service.getStats();
+  }
+
   @Get(":code")
   getByCode(@Param("code") code: string) {
     return this.service.getByCode(code);

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV = [
+  { href: "/admin/dashboard", label: "📊 Dashboard", match: "/admin/dashboard" },
   { href: "/admin/orders", label: "📋 Pedidos", match: "/admin/orders" },
   { href: "/admin/catalog", label: "🍓 Catálogo", match: "/admin/catalog" },
 ];
