@@ -29,7 +29,7 @@ export default async function AdminCatalogPage() {
         <tbody>
           {products.map((p: any) => (
             <tr key={p.id} style={{ borderBottom: "1px solid #eee" }}>
-              <td><a href={`/admin/catalog/${p.id}`}>{p.name}</a></td>
+              <td><a href={`/admin/catalog/${p.slug}`}>{p.name}</a></td>
               <td>{p.slug}</td>
               <td>{p.isActive ? "Sí" : "No"}</td>
               <td>{p.sortOrder}</td>

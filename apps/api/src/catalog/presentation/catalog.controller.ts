@@ -17,9 +17,12 @@ import { RolesGuard } from "../guards/roles.guard.js";
 import { ZodValidationPipe } from "../../common/pipes/zod-validation.pipe.js";
 import { createProductSchema, updateProductSchema, updateVariantPriceSchema } from "@maison-fraise/shared";
 import { memoryStorage } from "multer";
+import { writeFileSync, mkdirSync, existsSync } from "fs";
+import { join } from "path";
 
 const allowedMimes = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE = 5 * 1024 * 1024;
+const UPLOAD_DIR = join(process.cwd(), "uploads");
 
 @Controller()
 export class CatalogController {
@@ -89,7 +92,14 @@ export class CatalogController {
   async uploadImage(@Param("id") id: string, @UploadedFile() file: Express.Multer.File, @Body() body: any) {
     if (!file) throw new BadRequestException("File required");
     if (file.size > MAX_SIZE) throw new BadRequestException("File too large");
-    // optional sharp resize to 800w — try but fallback if sharp not available
+
+    // Save file to disk
+    if (!existsSync(UPLOAD_DIR)) mkdirSync(UPLOAD_DIR, { recursive: true });
+    const ext = file.mimetype === "image/png" ? ".png" : file.mimetype === "image/webp" ? ".webp" : ".jpg";
+    const filename = `${id}-${Date.now()}${ext}`;
+    const filepath = join(UPLOAD_DIR, filename);
+    writeFileSync(filepath, file.buffer);
+
     let width: number | undefined;
     let height: number | undefined;
     try {
@@ -97,12 +107,11 @@ export class CatalogController {
       const meta = await sharp(file.buffer).metadata();
       width = meta.width;
       height = meta.height;
-      // we could resize to 800w but store original as URL placeholder for now
     } catch {
-      // sharp not available or failed — continue
+      // sharp not available
     }
-    // In free-tier, store URL as data URI or placeholder local path; here use provided url or fallback
-    const url = body?.url || `https://placeholder.maison-fraise.local/${id}/${file.originalname}`;
+
+    const url = `/uploads/${filename}`;
     return this.service.createImage(id, {
       url,
       mimeType: file.mimetype,
