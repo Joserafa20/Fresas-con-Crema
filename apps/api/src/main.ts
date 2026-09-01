@@ -10,7 +10,7 @@ async function bootstrap() {
   app.setGlobalPrefix("api/v1");
 
   app.enableCors({
-    origin: process.env.CORS_ORIGIN ?? "http://localhost:3000",
+    origin: process.env.CORS_ORIGIN ?? "http://localhost:3003",
   });
 
   app.useGlobalPipes(
