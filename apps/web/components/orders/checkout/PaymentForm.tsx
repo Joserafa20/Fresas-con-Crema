@@ -1,5 +1,6 @@
 "use client";
-import type { PaymentMethod } from "@maison-fraise/shared";
+
+type PaymentMethod = "EFECTIVO" | "NEQUI" | "DAVIPLATA" | "LLAVE_BRE_B";
 
 interface PaymentFormProps {
   value: PaymentMethod;

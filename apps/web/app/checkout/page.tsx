@@ -1,13 +1,13 @@
 "use client";
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import type { PaymentMethod } from "@maison-fraise/shared";
+import { Suspense, useState, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ProductPicker, CartItem } from "../../components/orders/checkout/ProductPicker";
 import { CustomerForm, CustomerData } from "../../components/orders/checkout/CustomerForm";
 import { PaymentForm } from "../../components/orders/checkout/PaymentForm";
 import { OrderSummary } from "../../components/orders/checkout/OrderSummary";
 
 type Step = "cart" | "customer" | "payment" | "review";
+type PaymentMethod = "EFECTIVO" | "NEQUI" | "DAVIPLATA" | "LLAVE_BRE_B";
 
 const EMPTY_CUSTOMER: CustomerData = {
   name: "",
@@ -19,8 +19,9 @@ const EMPTY_CUSTOMER: CustomerData = {
   deliveryMethod: "pickup",
 };
 
-export default function CheckoutPage() {
+function CheckoutInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<Step>("cart");
   const [items, setItems] = useState<CartItem[]>([]);
   const [customer, setCustomer] = useState<CustomerData>(EMPTY_CUSTOMER);
@@ -28,6 +29,11 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [orderCode, setOrderCode] = useState<string | null>(null);
+  const [preselected, setPreselected] = useState(false);
+
+  // Read variant+toppings from URL params (from "Hacer Pedido" link)
+  const initialVariant = searchParams.get("variant");
+  const initialToppings = searchParams.get("toppings");
 
   const addItem = useCallback((item: CartItem) => {
     setItems((prev) => [...prev, item]);
@@ -47,7 +53,15 @@ export default function CheckoutPage() {
   };
 
   const goNext = () => {
-    if (step === "cart") { setStep("customer"); return; }
+    if (step === "cart") {
+      if (items.length === 0) {
+        setErrors({ cart: "Agregá al menos un producto" });
+        return;
+      }
+      setErrors({});
+      setStep("customer");
+      return;
+    }
     if (step === "customer") {
       if (validateCustomer()) setStep("payment");
       return;
@@ -151,7 +165,12 @@ export default function CheckoutPage() {
       {/* Step content */}
       {step === "cart" && (
         <>
-          <ProductPicker onAddItem={addItem} />
+          <ProductPicker onAddItem={addItem} initialVariantId={initialVariant} initialToppings={initialToppings} />
+          {errors.cart && (
+            <div style={{ marginTop: 8, padding: 8, background: "#fef2f2", borderRadius: 8, color: "#e11d48", fontSize: 13 }}>
+              {errors.cart}
+            </div>
+          )}
           {items.length > 0 && (
             <div style={{ marginTop: 16 }}>
               <h3 style={{ margin: "0 0 8px" }}>Tu pedido ({items.length} items)</h3>
@@ -216,5 +235,13 @@ export default function CheckoutPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<main style={{ padding: "2rem", textAlign: "center" }}>Cargando...</main>}>
+      <CheckoutInner />
+    </Suspense>
   );
 }

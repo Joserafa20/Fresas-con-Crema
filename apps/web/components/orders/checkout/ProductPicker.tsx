@@ -1,6 +1,11 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import { formatCop, TOPPING_UNIT_PRICE } from "@maison-fraise/shared";
+
+const TOPPING_UNIT_PRICE = 1500;
+
+function formatCop(cents: number): string {
+  return `$${cents.toLocaleString("es-CO")}`;
+}
 
 interface Product {
   id: string;
@@ -24,9 +29,11 @@ export interface CartItem {
 
 interface ProductPickerProps {
   onAddItem: (item: CartItem) => void;
+  initialVariantId?: string | null;
+  initialToppings?: string | null;
 }
 
-export function ProductPicker({ onAddItem }: ProductPickerProps) {
+export function ProductPicker({ onAddItem, initialVariantId, initialToppings }: ProductPickerProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
@@ -38,10 +45,26 @@ export function ProductPicker({ onAddItem }: ProductPickerProps) {
     const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
     fetch(`${base}/api/v1/products`)
       .then((r) => (r.ok ? r.json() : []))
-      .then((data) => setProducts(data))
+      .then((data) => {
+        setProducts(data);
+        // Preselect from URL params
+        if (initialVariantId) {
+          for (const p of data) {
+            const v = p.variants?.find((v: any) => v.id === initialVariantId);
+            if (v) {
+              setSelectedProductId(p.id);
+              setSelectedVariantId(v.id);
+              if (initialToppings) {
+                setSelectedToppings(initialToppings.split(",").filter(Boolean));
+              }
+              break;
+            }
+          }
+        }
+      })
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [initialVariantId, initialToppings]);
 
   const selectedProduct = products.find((p) => p.id === selectedProductId) ?? null;
   const selectedVariant = selectedProduct?.variants.find((v) => v.id === selectedVariantId) ?? selectedProduct?.variants[0] ?? null;

@@ -1,8 +1,12 @@
 "use client";
-import { formatCop } from "@maison-fraise/shared";
 import type { CartItem } from "./ProductPicker";
 import type { CustomerData } from "./CustomerForm";
-import type { PaymentMethod } from "@maison-fraise/shared";
+
+function formatCop(cents: number): string {
+  return `$${cents.toLocaleString("es-CO")}`;
+}
+
+type PaymentMethod = "EFECTIVO" | "NEQUI" | "DAVIPLATA" | "LLAVE_BRE_B";
 
 interface OrderSummaryProps {
   items: CartItem[];
