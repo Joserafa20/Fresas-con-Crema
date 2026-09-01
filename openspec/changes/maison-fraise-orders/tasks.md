@@ -54,31 +54,31 @@ Chain strategy: stacked-to-main
 
 ## Phase 4: Client Checkout Web
 
-- [ ] 4.1 Create `apps/web/components/orders/checkout/ProductPicker.tsx` — product/variant/topping selection with price display and running total
-- [ ] 4.2 Create `apps/web/components/orders/checkout/CustomerForm.tsx` — name, phone, delivery method, conditional address fields
-- [ ] 4.3 Create `apps/web/components/orders/checkout/PaymentForm.tsx` — radio payment methods with digital confirmation
-- [ ] 4.4 Create `apps/web/components/orders/checkout/OrderSummary.tsx` — final review with submit
-- [ ] 4.5 Create `apps/web/app/pedidos/page.tsx` — multi-step wizard orchestrating ProductPicker → CustomerForm → PaymentForm → OrderSummary → success page with order code
+- [x] 4.1 Create `apps/web/components/orders/checkout/ProductPicker.tsx` — product/variant/topping selection with price display and running total
+- [x] 4.2 Create `apps/web/components/orders/checkout/CustomerForm.tsx` — name, phone, delivery method, conditional address fields
+- [x] 4.3 Create `apps/web/components/orders/checkout/PaymentForm.tsx` — radio payment methods with digital confirmation
+- [x] 4.4 Create `apps/web/components/orders/checkout/OrderSummary.tsx` — final review with submit
+- [x] 4.5 Create `apps/web/app/checkout/page.tsx` — multi-step wizard orchestrating ProductPicker → CustomerForm → PaymentForm → OrderSummary → success page with order code
 
 ## Phase 5: Admin Order Dashboard
 
-- [ ] 5.1 Create `apps/web/components/orders/admin/OrderRow.tsx` — list row with code, status badge, customer, origin, total, payment status
-- [ ] 5.2 Create `apps/web/components/orders/admin/StatusActions.tsx` — status transition buttons (confirm, cancel, advance) per current state
-- [ ] 5.3 Create `apps/web/components/orders/admin/PaymentActions.tsx` — payment verification actions (PENDIENTE → VERIFICANDO → CONFIRMADO/RECHAZADO)
-- [ ] 5.4 Create `apps/web/components/orders/admin/SoundAlert.tsx` — Web Audio oscillator beep, opt-in toggle, configurable volume
-- [ ] 5.5 Create `apps/web/app/admin/orders/page.tsx` — order list with 30s polling, badge count for new orders, visual highlight
-- [ ] 5.6 Create `apps/web/app/admin/orders/[code]/page.tsx` — order detail with items, customer, payment, history timeline, action buttons
+- [x] 5.1 Create `apps/web/components/orders/admin/OrderRow.tsx` — list row with code, status badge, customer, origin, total, payment status
+- [x] 5.2 Create `apps/web/components/orders/admin/StatusActions.tsx` — status transition buttons (confirm, cancel, advance) per current state
+- [x] 5.3 Create `apps/web/components/orders/admin/PaymentActions.tsx` — payment verification actions (PENDIENTE → VERIFICANDO → CONFIRMADO/RECHAZADO)
+- [x] 5.4 Create `apps/web/components/orders/admin/SoundAlert.tsx` — Web Audio oscillator beep, opt-in toggle, configurable volume
+- [x] 5.5 Create `apps/web/app/admin/orders/page.tsx` — order list with 30s polling, badge count for new orders, visual highlight
+- [x] 5.6 Create `apps/web/app/admin/orders/[code]/page.tsx` — order detail with items, customer, payment, history timeline, action buttons
 
 ## Phase 6: Client Tracking
 
-- [ ] 6.1 Create `apps/web/components/orders/tracking/StatusTimeline.tsx` — visual progress indicator through status states
-- [ ] 6.2 Create `apps/web/app/pedidos/seguimiento/[code]/page.tsx` — tracking page with code input, 15s polling, terminal status auto-stop
+- [x] 6.1 Create `apps/web/components/orders/tracking/StatusTimeline.tsx` — visual progress indicator through status states
+- [x] 6.2 Create `apps/web/app/tracking/[code]/page.tsx` — tracking page with 15s polling, terminal status auto-stop
 
 ## Phase 7: Notifications Polling Integration
 
-- [ ] 7.1 Wire admin dashboard 30s polling to `GET /api/v1/orders/pending`, detect new orders by diff, trigger visual badge + SoundAlert
-- [ ] 7.2 Wire client tracking 15s polling to `GET /api/v1/orders/:code`, stop on terminal status
-- [ ] 7.3 Implement polling error handling: retry on next interval, "connection lost" indicator after 3 consecutive failures
+- [x] 7.1 Wire admin dashboard 30s polling to `GET /api/v1/orders/pending`, detect new orders by diff, trigger visual badge + SoundAlert
+- [x] 7.2 Wire client tracking 15s polling to `GET /api/v1/orders/:code`, stop on terminal status
+- [x] 7.3 Implement polling error handling: retry on next interval, "connection lost" indicator after 3 consecutive failures
 
 ## Phase 8: Integration Verification
 

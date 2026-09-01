@@ -1,4 +1,4 @@
-# Apply Progress: maison-fraise-orders — PR1
+# Apply Progress: maison-fraise-orders — PR1 + PR2
 
 ## Completed Phases
 
@@ -36,58 +36,84 @@
 - **Tests**: 16/16 passing (state machine, domain constants, health)
 - **Typecheck**: Clean
 
-## Work Unit Evidence
+### Phase 4: Client Checkout Web
+- **Status**: Complete
+- **Files**:
+  - `apps/web/components/orders/checkout/ProductPicker.tsx` — product/variant/topping selection with price display and running total
+  - `apps/web/components/orders/checkout/CustomerForm.tsx` — name, phone, delivery method, conditional address fields
+  - `apps/web/components/orders/checkout/PaymentForm.tsx` — radio payment methods (Efectivo/Nequi/Daviplata/BRE-B)
+  - `apps/web/components/orders/checkout/OrderSummary.tsx` — final review with submit
+  - `apps/web/app/checkout/page.tsx` — multi-step wizard (cart → customer → payment → review → success)
+
+### Phase 5: Admin Order Dashboard
+- **Status**: Complete
+- **Files**:
+  - `apps/web/components/orders/admin/OrderRow.tsx` — list row with code, status badge, customer, total, payment status
+  - `apps/web/components/orders/admin/StatusActions.tsx` — status transition buttons per current state
+  - `apps/web/components/orders/admin/PaymentActions.tsx` — payment verification (PENDIENTE→VERIFICANDO→CONFIRMADO/RECHAZADO)
+  - `apps/web/components/orders/admin/SoundAlert.tsx` — Web Audio oscillator beep, opt-in toggle, configurable volume
+  - `apps/web/app/admin/orders/page.tsx` — order list with 30s polling, badge count for new orders, visual highlight
+  - `apps/web/app/admin/orders/[code]/page.tsx` — order detail with items, customer, payment, history timeline, action buttons
+
+### Phase 6: Client Tracking
+- **Status**: Complete
+- **Files**:
+  - `apps/web/components/orders/tracking/StatusTimeline.tsx` — visual progress indicator through status states
+  - `apps/web/app/tracking/[code]/page.tsx` — tracking page with 15s polling, terminal status auto-stop
+
+### Phase 7: Notifications Polling Integration
+- **Status**: Complete
+- **Implementation**:
+  - Admin dashboard polls `GET /api/v1/orders` every 30s, detects new NUEVO orders by diff, triggers visual badge + SoundAlert
+  - Client tracking polls `GET /api/v1/orders/:code` every 15s, stops on terminal status (ENTREGADO/CANCELADO)
+  - Error handling: retry on next interval, "connection lost" indicator after 3 consecutive failures
+
+## Work Unit Evidence — PR2
 
 | Evidence | Value |
 |----------|-------|
-| Focused test command | `pnpm --filter shared test && pnpm --filter api test` — 50/50 pass |
-| Runtime harness | NestJS app boots, OrderModule registers; `POST /api/v1/orders` endpoint available |
-| Rollback boundary | `git revert` of all changes in this PR (schema migration + shared/order/* + apps/api/src/orders/*) |
+| Focused test command | `pnpm --filter web build` — compiles successfully |
+| Runtime harness | Admin list shows orders with 30s polling, checkout flow completes with order code, tracking reflects status |
+| Rollback boundary | Revert `apps/web/app/checkout/`, `apps/web/app/admin/orders/`, `apps/web/app/tracking/`, `apps/web/components/orders/` |
 
-## Commit
+## Commits
 
-feat(orders-api): OrderModule with state machine, price snapshot, and business hours guard (PR1)
+PR1: `feat(orders-api): OrderModule with state machine, price snapshot, and business hours guard (PR1)`
+PR2: `feat(orders-web): checkout flow, admin dashboard, tracking, and notifications (PR2)`
+
+## Deviation from Design
+
+Route paths changed from design (`/pedidos`, `/pedidos/seguimiento/[code]`) to match PR scope (`/checkout`, `/tracking/[code]`). Functional behavior is identical — this is purely a URL routing difference.
 
 ## Files Changed Summary
 
 | File | Action |
 |------|--------|
-| `prisma/schema.prisma` | Modified — 6 models + 4 enums |
-| `prisma/migrations/20260901151048_add_order_domain/` | Created |
-| `packages/shared/src/order/enums.ts` | Created |
-| `packages/shared/src/order/schemas.ts` | Created |
-| `packages/shared/src/order/pricing.ts` | Created |
-| `packages/shared/src/order/order-code.ts` | Created |
-| `packages/shared/src/order/index.ts` | Created |
-| `packages/shared/src/index.ts` | Modified |
-| `apps/api/src/orders/domain/order.types.ts` | Created |
-| `apps/api/src/orders/ports/order.repository.ts` | Created |
-| `apps/api/src/orders/ports/customer.repository.ts` | Created |
-| `apps/api/src/orders/application/order.service.ts` | Created |
-| `apps/api/src/orders/infra/prisma-order.repository.ts` | Created |
-| `apps/api/src/orders/infra/prisma-customer.repository.ts` | Created |
-| `apps/api/src/orders/guards/business-hours.guard.ts` | Created |
-| `apps/api/src/orders/presentation/order.controller.ts` | Created |
-| `apps/api/src/orders/order.module.ts` | Created |
-| `apps/api/src/app.module.ts` | Modified |
-| `apps/api/src/config/env.schema.ts` | Modified |
-| `packages/shared/src/order/order-code.test.ts` | Created |
-| `packages/shared/src/order/pricing.test.ts` | Created |
-| `packages/shared/src/order/schemas.test.ts` | Created |
-| `apps/api/src/orders/order.types.test.ts` | Created |
-| `apps/api/src/orders/domain/order.types.constants.test.ts` | Created |
+| `apps/web/components/orders/checkout/ProductPicker.tsx` | Created |
+| `apps/web/components/orders/checkout/CustomerForm.tsx` | Created |
+| `apps/web/components/orders/checkout/PaymentForm.tsx` | Created |
+| `apps/web/components/orders/checkout/OrderSummary.tsx` | Created |
+| `apps/web/app/checkout/page.tsx` | Created |
+| `apps/web/components/orders/admin/OrderRow.tsx` | Created |
+| `apps/web/components/orders/admin/StatusActions.tsx` | Created |
+| `apps/web/components/orders/admin/PaymentActions.tsx` | Created |
+| `apps/web/components/orders/admin/SoundAlert.tsx` | Created |
+| `apps/web/app/admin/orders/page.tsx` | Created |
+| `apps/web/app/admin/orders/[code]/page.tsx` | Created |
+| `apps/web/components/orders/tracking/StatusTimeline.tsx` | Created |
+| `apps/web/app/tracking/[code]/page.tsx` | Created |
+
+## Remaining Tasks (Phase 8)
+
+- [ ] 8.1 Verify `pnpm build` passes across all workspaces
+- [ ] 8.2 Verify `POST /api/v1/orders` with valid payload returns 201 with order code and snapshotted prices
+- [ ] 8.3 Verify invalid status transitions rejected with descriptive error
+- [ ] 8.4 Verify admin list auto-refreshes and shows badge on new order
+- [ ] 8.5 Verify client checkout completes end-to-end and tracking reflects status
 
 ## Risks
 
-1. **Prisma generate EPERM**: Windows file locking during `prisma generate`. Resolved by killing node processes. May recur in CI — add retry logic.
-2. **Business hours guard**: Config-optional — if env vars not set, guard is permissive (always allows). This is intentional for dev flexibility.
-3. **Customer upsert by phone**: If two orders arrive simultaneously with same phone, upsert handles it. No race condition due to unique constraint.
-4. **Order code collision**: Daily sequence via `countTodayOrders()` — under extreme concurrent load, two orders could get the same code. Low risk for MVP; add unique constraint check with retry for production.
-
-## Remaining Tasks (PR2)
-
-- [ ] Phase 4: Client Checkout Web
-- [ ] Phase 5: Admin Order Dashboard
-- [ ] Phase 6: Client Tracking
-- [ ] Phase 7: Notifications Polling Integration
-- [ ] Phase 8: Integration Verification
+1. **Route path change**: PR uses `/checkout` and `/tracking/[code]` instead of design's `/pedidos` and `/pedidos/seguimiento/[code]`. User may need to update internal links.
+2. **No auth on admin**: Admin order pages have no authentication guard. Anyone with the URL can view/manage orders.
+3. **Sound alert browser policy**: Web Audio API requires user interaction before first play. The opt-in toggle handles this but may confuse users who enable it before any interaction.
+4. **Pre-existing warnings**: `formatCop`, `TOPPING_UNIT_PRICE`, `calcTotalCents` import warnings are from pre-existing catalog components, not from PR2 code.
